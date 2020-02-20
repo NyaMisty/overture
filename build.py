@@ -96,4 +96,4 @@ if __name__ == "__main__":
         go_build_zip(GO_IOS_ARCH_LIST, go_build_ios)
     
     if "-build-android":
-        go_build_zip(GO_ANDROID_ARCH_LIST, go_build_desktop)
+        go_build_zip(GO_ANDROID_ARCH_LIST, go_build_android)
