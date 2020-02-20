@@ -1,30 +1,53 @@
 # appveyor.yml
-image: Ubuntu
-
-clone_folder: /usr/go/src/github.com/shawn1m/overture
-
-branches:
-  only:
-    - master
-
-skip_tags: true
-
-skip_branch_with_pr: true
-
-environment:
-  GOPATH: /usr/go/
+image: 
+  - Visual Studio 2019
+  - macOS
 
 stack: go 1.13
 
-before_build:
-  - "python3 ./build.py -create-sample"
-  - "python3 ./build.py -build"
+for:
+-
+  matrix:
+    only:
+      - image: macOS
+  environment:
+    GOPATH: /tmp/
+  clone_folder: /tmp/go/src/github.com/shawn1m/overture
+  before_build:
+    - "echo Building from macOS"
+    - "go env"
+    - "ls -al"
+    - "python3 ./build.py -build-ios"
 
-before_test:
-  - go vet ./...
+-
+  matrix:
+    only:
+      - image: Visual Studio 2019
+  init:
+    - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  environment:
+    APPVEYOR_RDP_PASSWORD: test@Pass
+    GOPATH: c:\gopath
+    ANDROID_NDK_ROOT: C:\ProgramData\Microsoft\AndroidNDK64\android-ndk-r16b
+  clone_folder: c:\gopath\src\github.com\shawn1m\overture
+  before_build:
+    - "python %ANDROID_NDK_ROOT%/build/tools/make_standalone_toolchain.py --api=16 --install-dir=%ANDROID_NDK_ROOT%/bin/arm-linux-androideabi/ --arch=arm"
+    - "python %ANDROID_NDK_ROOT%/build/tools/make_standalone_toolchain.py --api=21 --install-dir=%ANDROID_NDK_ROOT%/bin/aarch64-linux-android/ --arch=arm64"
+    - "python %ANDROID_NDK_ROOT%/build/tools/make_standalone_toolchain.py --api=16 --install-dir=%ANDROID_NDK_ROOT%/bin/i686-linux-android/ --arch=x86"
+    - "python %ANDROID_NDK_ROOT%/build/tools/make_standalone_toolchain.py --api=21 --install-dir=%ANDROID_NDK_ROOT%/bin/x86_64-linux-android/ --arch=x86_64"
+    - "python3 ./build.py -create-sample"
+    - "python3 ./build.py -build"
+    - "python3 ./build.py -build-android"
+  on_finish:
+    - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
-test_script:
-  - go test ./...
+#branches:
+#  only:
+#    - master
+
+#skip_tags: true
+
+#skip_branch_with_pr: true
 
 artifacts:
   - path: 'overture-*.zip'
