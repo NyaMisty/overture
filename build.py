@@ -45,7 +45,7 @@ def go_build_ios(binary_name, version, o, a, p):
 
 def go_build_android(binary_name, version, o, a, p):
     triple = p[0]
-    subprocess.check_call("CC=%ANDROID_NDK_ROOT%/bin/" + triple + "/bin/" + triple + "-gcc GOOS=" + o + " GOARCH=" + a + " CGO_ENABLED=1" + " go build -ldflags \"-s -w " +
+    subprocess.check_call("CC=$ANDROID_NDK_ROOT/bin/" + triple + "/bin/" + triple + "-gcc GOOS=" + o + " GOARCH=" + a + " CGO_ENABLED=1" + " go build -ldflags \"-s -w " +
                                   "-X main.version=" + version + "\" -o " + binary_name + " main/main.go", shell=True)
 
 def go_build_zip(arches, builder):
@@ -92,8 +92,8 @@ if __name__ == "__main__":
     if "-build" in sys.argv:
         go_build_zip(GO_OS_ARCH_LIST, go_build_desktop)
     
-    if "-build-ios":
+    if "-build-ios" in sys.argv:
         go_build_zip(GO_IOS_ARCH_LIST, go_build_ios)
     
-    if "-build-android":
+    if "-build-android" in sys.argv:
         go_build_zip(GO_ANDROID_ARCH_LIST, go_build_android)
