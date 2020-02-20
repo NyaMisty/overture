@@ -4,12 +4,14 @@ import subprocess
 import sys
 
 GO_OS_ARCH_LIST = [
-    ["darwin", "amd64"],
-    ["linux", "386"],
-    ["linux", "amd64"],
-    ["linux", "arm"],
-    ["linux", "arm64"],
-    ["linux", "mips", "softfloat"],
+#    ["darwin", "amd64"],
+    ["darwin", "arm64"],
+#    ["linux", "386"],
+#    ["linux", "amd64"],
+#    ["linux", "arm"],
+#    ["linux", "arm64"],
+#    ["linux", "mips", "softfloat"],
+'''
     ["linux", "mips", "hardfloat"],
     ["linux", "mipsle", "softfloat"],
     ["linux", "mipsle", "hardfloat"],
@@ -19,7 +21,8 @@ GO_OS_ARCH_LIST = [
     ["freebsd", "amd64"],
     ["windows", "386"],
     ["windows", "amd64"]
-              ]
+'''
+]
 
 
 def go_build_zip():
@@ -30,7 +33,7 @@ def go_build_zip():
         version = subprocess.check_output("git describe --tags", shell=True).decode()
         mipsflag = (" GOMIPS=" + (p[0] if p else "") if p else "")
         try:
-            subprocess.check_call("GOOS=" + o + " GOARCH=" + a + mipsflag + " CGO_ENABLED=0" + " go build -ldflags \"-s -w " +
+            subprocess.check_call("GOOS=" + o + " GOARCH=" + a + mipsflag + " CGO_ENABLED=%d" % (1 if o == "darwin" and a.startswith("arm") else 0) + " go build -ldflags \"-s -w " +
                                   "-X main.version=" + version + "\" -o " + binary_name + " main/main.go", shell=True)
             subprocess.check_call("zip " + zip_name + ".zip " + binary_name + " " + "hosts_sample "
                                                                                     "ip_network_primary_sample "

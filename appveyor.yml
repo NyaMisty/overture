@@ -1,10 +1,10 @@
 # appveyor.yml
-image: Ubuntu
+image: macos
 
-clone_folder: /usr/go/src/github.com/shawn1m/overture
+clone_folder: /tmp/src/github.com/shawn1m/overture
 
 environment:
-  GOPATH: /usr/go/
+  GOPATH: /tmp/
 
 stack: go 1.13
 
