@@ -33,8 +33,11 @@ def go_build_zip():
         version = subprocess.check_output("git describe --tags", shell=True).decode()
         mipsflag = (" GOMIPS=" + (p[0] if p else "") if p else "")
         try:
-            subprocess.check_call("GOOS=" + o + " GOARCH=" + a + mipsflag + " CGO_ENABLED=%d" % (1 if o == "darwin" and a.startswith("arm") else 0) + " go build -ldflags \"-s -w " +
+            if o == "darwin" and a.startswith("arm"):
+                subprocess.check_call("CC=$(go env GOROOT)/misc/ios/clangwrap.sh GOOS=" + o + " GOARCH=" + a + mipsflag + " CGO_ENABLED=1" + " go build -ldflags \"-s -w " +
                                   "-X main.version=" + version + "\" -o " + binary_name + " main/main.go", shell=True)
+            else:
+                subprocess.check_call("GOOS=" + o + " GOARCH=" + a + mipsflag + " CGO_ENABLED=0" + " go build -ldflags \"-s -w " +                                                                                                      "-X main.version=" + version + "\" -o " + binary_name + " main/main.go", shell=True)
             subprocess.check_call("zip " + zip_name + ".zip " + binary_name + " " + "hosts_sample "
                                                                                     "ip_network_primary_sample "
                                                                                     "ip_network_alternative_sample "
