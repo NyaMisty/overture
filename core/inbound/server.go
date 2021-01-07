@@ -246,9 +246,21 @@ func (s *Server) ServeDNS(w dns.ResponseWriter, q *dns.Msg) {
 		return
 	}
 
-	if responseMessage.Answer == nil || len(responseMessage.Answer) == 0 {
-		q.Question[0].Qtype = dns.TypeAAAA
-		responseMessage = s.dispatcher.Exchange(q, inboundIP)
+	if isQuestionType(q, dns.TypeA) {
+		needV6 := true
+		if responseMessage.Answer != nil && len(responseMessage.Answer) != 0 {
+			for _, answ := range responseMessage.Answer {
+				if answ.Header().Rrtype == dns.TypeA {
+					needV6 = false
+				}
+			}
+ 		} else {
+			needV6 = true
+		}
+		if needV6 {
+			q.Question[0].Qtype = dns.TypeAAAA
+			responseMessage = s.dispatcher.Exchange(q, inboundIP)
+		}
 	}
 
 	err := w.WriteMsg(responseMessage)
