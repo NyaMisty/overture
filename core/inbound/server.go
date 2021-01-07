@@ -246,6 +246,11 @@ func (s *Server) ServeDNS(w dns.ResponseWriter, q *dns.Msg) {
 		return
 	}
 
+	if responseMessage.Answer == nil || len(responseMessage.Answer) == 0 {
+		q.Question[0].Qtype = dns.TypeAAAA
+		responseMessage = s.dispatcher.Exchange(q, inboundIP)
+	}
+
 	err := w.WriteMsg(responseMessage)
 	if err != nil {
 		log.Warnf("Write message failed, message: %s, error: %s", responseMessage, err)
